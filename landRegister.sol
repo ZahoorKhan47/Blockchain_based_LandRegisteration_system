@@ -322,6 +322,8 @@ function GetArea(uint _landId) public view returns (uint) {
 
 
     function Pay(address payable _receiver, uint _landId) public payable {
+        uint price=lands[_landId].landPrice;
+        require(msg.value==price,"Your payment is not exactly eqaule to landPrice");
         receivedPayments[_landId] = true;
         _receiver.transfer(msg.value);
     }
