@@ -250,13 +250,7 @@ function checkLandInspector(address _inspectorId) public view returns (bool) {
         return false;
     }
 
-      function IsLandPaid(uint _landId) internal view returns (bool) {
-        if(receivedPayments[_landId]){
-            return true;
-        }
-        return false;
-    }
-
+   
 
 
 
@@ -330,7 +324,7 @@ function GetArea(uint _landId) public view returns (uint) {
 //  The land ownership will transfer to the new owner by land inspector
     function transferLandOwnership(uint _landId, address _newLandOwner) public{
         require(checkLandInspector(msg.sender));
-        require(IsLandPaid(_landId));
+        require(receivedPayments[_landId],"The land price is not paid by the buyer");
 
         LandOwner[_landId] = payable(_newLandOwner);
     }
