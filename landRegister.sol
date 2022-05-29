@@ -61,29 +61,28 @@ contract landRegistry{
    /* The following mapping are used to store different parties like Sellers , Buyer , Inspetor and more 
    things like Lands, verified_Sellers, verified_buyers and more */
 
-mapping(uint => Land) public lands;
-    mapping(uint => LandInspector) public InspectorMapping;
-    mapping(address => Seller) public SellerMapping;
-    mapping(address => Buyer) public BuyerMapping;
-    mapping(uint => address) public LandOwner;
-    mapping(address => bool) public registeredSellers;
-    mapping(address => bool) public verifiedSellers;
-    mapping(address => bool) public rejectedSellers;
-    mapping(address => bool) public registeredBuyers;
-    mapping(address => bool) public verifiedBuyer;
-    mapping(address => bool) public rejectedBuyer;
-    mapping(uint => bool) public verifiedLands;
-    mapping(uint => bool) public receivedPayments;
-    mapping(address => bool) public registeredAddresses;
+mapping(uint => Land) private lands;
+    mapping(uint => LandInspector) private InspectorMapping;
+    mapping(address => Seller) private SellerMapping;
+    mapping(address => Buyer) private BuyerMapping;
+    mapping(uint => address payable) private LandOwner;
+    mapping(address => bool) private registeredSellers;
+    mapping(address => bool) private verifiedSellers;
+    mapping(address => bool) private rejectedSellers;
+    mapping(address => bool) private registeredBuyers;
+    mapping(address => bool) private verifiedBuyer;
+    mapping(address => bool) private rejectedBuyer;
+    mapping(uint => bool) private verifiedLands;
+    mapping(uint => bool) private receivedPayments;
+    mapping(address => bool) private registeredAddresses;
 
     address public inspector;
-    address[] public sellers;
-    address[] public buyers;
+    address[] private sellers;
+    address[] private buyers;
 
-    uint public totalinspectors;
-    uint public totallands;
-    uint public totalsellers;
-    uint public totalbuyers;
+    uint private totalinspectors;
+    uint private totallands;
+  
     
 
     event Registration(address _registrationId);  
@@ -102,12 +101,14 @@ mapping(uint => Land) public lands;
         totalinspectors++;
         InspectorMapping[totalinspectors] = LandInspector(totalinspectors, _name, _age, _designation);
     }
-     function addLand(uint _area, string memory _city,string memory _state, uint landPrice, uint _propertyPID) public {
+     function addLand(uint _area, string memory _city,string memory _state, uint _landPrice , uint _propertyPID) public {
       //The require  check Seller and its id verifcation 
         require((checkSellerVerification(msg.sender)) && (checkIdVerification(msg.sender)));
         totallands++;
-        lands[totallands] = Land(totallands, _area, _city, _state, landPrice,_propertyPID);
-        LandOwner[totallands] = msg.sender;
+        ////the following commented line will convert land price unit from wei to ether
+      ///  _landPrice*=10^18;
+        lands[totallands] = Land(totallands, _area, _city, _state, _landPrice ,_propertyPID);
+        LandOwner[totallands] = payable(msg.sender);
     
     }
 
@@ -117,7 +118,6 @@ mapping(uint => Land) public lands;
 
         registeredAddresses[msg.sender] = true;
         registeredSellers[msg.sender] = true ;
-        totalsellers++;
         SellerMapping[msg.sender] = Seller(msg.sender, _name, _age, _city,_cnic,_email);
         sellers.push(msg.sender);
         emit Registration(msg.sender);
@@ -131,7 +131,6 @@ mapping(uint => Land) public lands;
 
         registeredAddresses[msg.sender] = true;
         registeredBuyers[msg.sender] = true ;
-        totalbuyers++;
         BuyerMapping[msg.sender] = Buyer(msg.sender, _name, _age, _city, _cnic, _email);
         buyers.push(msg.sender);
 
@@ -251,7 +250,7 @@ function checkLandInspector(address _inspectorId) public view returns (bool) {
         return false;
     }
 
-      function IsLandPaid(uint _landId) public view returns (bool) {
+      function IsLandPaid(uint _landId) internal view returns (bool) {
         if(receivedPayments[_landId]){
             return true;
         }
@@ -307,13 +306,7 @@ function GetArea(uint _landId) public view returns (uint) {
     }
 
 
-    function getSeller() public view returns( address [] memory ){
-        return(sellers);
-    }
-
-    function getBuyer() public view returns( address [] memory ){
-        return(buyers);
-    }
+    
 
 
 
@@ -321,19 +314,25 @@ function GetArea(uint _landId) public view returns (uint) {
 
 
 
-    function Pay(address payable _receiver, uint _landId) public payable {
+    function BuyLand (uint _landId) public payable {
+        require(verifiedBuyer[msg.sender]);
+        require(registeredSellers[LandOwner[_landId]]);
+        require(verifiedLands[_landId],"You Cannot buy the land because it is not verified");
         uint price=lands[_landId].landPrice;
         require(msg.value==price,"Your payment is not exactly eqaule to landPrice");
+
         receivedPayments[_landId] = true;
-        _receiver.transfer(msg.value);
+        LandOwner[_landId].transfer(msg.value);
+      
     }
   
 
-//  The land ownership will transfer to the new owner 
+//  The land ownership will transfer to the new owner by land inspector
     function transferLandOwnership(uint _landId, address _newLandOwner) public{
         require(checkLandInspector(msg.sender));
+        require(IsLandPaid(_landId));
 
-        LandOwner[_landId] = _newLandOwner;
+        LandOwner[_landId] = payable(_newLandOwner);
     }
    
 
@@ -343,4 +342,3 @@ function GetArea(uint _landId) public view returns (uint) {
 
 
 }
-
