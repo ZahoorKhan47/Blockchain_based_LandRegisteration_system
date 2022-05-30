@@ -61,7 +61,7 @@ contract landRegistry{
    /* The following mapping are used to store different parties like Sellers , Buyer , Inspetor and more 
    things like Lands, verified_Sellers, verified_buyers and more */
 
-mapping(uint => Land) private lands;
+    mapping(uint => Land) private lands;
     mapping(uint => LandInspector) private InspectorMapping;
     mapping(address => Seller) private SellerMapping;
     mapping(address => Buyer) private BuyerMapping;
@@ -97,11 +97,20 @@ mapping(uint => Land) private lands;
 
 /*  Through the following we can add lands , inspectors and register sellers and buyers */
 
-  function addLandInspector(string memory _name, uint _age, string memory _designation) public {
+  function addLandInspector(
+      string memory _name,
+      uint _age, 
+      string memory _designation) public {
+
         totalinspectors++;
         InspectorMapping[totalinspectors] = LandInspector(totalinspectors, _name, _age, _designation);
     }
-     function addLand(uint _area, string memory _city,string memory _state, uint _landPrice , uint _propertyPID) public {
+     function addLand(
+         uint _area,
+         string memory _city,
+         string memory _state, 
+         uint _landPrice , 
+         uint _propertyPID) public {
       //The require  check Seller and its id verifcation 
         require((checkSellerVerification(msg.sender)) && (checkIdVerification(msg.sender)));
         totallands++;
@@ -112,7 +121,12 @@ mapping(uint => Land) private lands;
     
     }
 
-      function registerSeller(string memory _name, uint _age, string memory _city,string memory _cnic,string memory _email) public {
+      function registerSeller(
+          string memory _name, 
+          uint _age, 
+          string memory _city,
+          string memory _cnic,
+          string memory _email) public {
      //here the require check that the seller is not already registered
         require(!registeredAddresses[msg.sender]);
 
@@ -124,7 +138,12 @@ mapping(uint => Land) private lands;
     }
 
     
-    function registerBuyer(string memory _name, uint _age, string memory _city, string memory _cnic, string memory _email) public {
+    function registerBuyer(
+        string memory _name, 
+        uint _age, 
+        string memory _city, 
+        string memory _cnic, 
+        string memory _email) public {
      //here the require check that the buyer is not already registered
     
         require(!registeredAddresses[msg.sender]);
@@ -145,7 +164,12 @@ mapping(uint => Land) private lands;
 
 /* Buyers and Sellers details can also be updated through these function*/
 
-function updateSeller(string memory _name, uint _age, string memory _city,string memory _cnic,string memory _email) public {
+function updateSeller(
+    string memory _name, 
+    uint _age, 
+    string memory _city,
+    string memory _cnic,
+    string memory _email) public {
         // here the require check that the editor is registered and contract deployer
         require(registeredAddresses[msg.sender] && (SellerMapping[msg.sender].id == msg.sender));
 
@@ -157,7 +181,12 @@ function updateSeller(string memory _name, uint _age, string memory _city,string
 
     }
 
-  function updateBuyer(string memory _name,uint _age, string memory _city,string memory _cnic, string memory _email) public {
+  function updateBuyer(
+      string memory _name,
+      uint _age, 
+      string memory _city,
+      string memory _cnic, 
+      string memory _email) public {
         // here the require check that the editor is registered and contract deployer
     
         require(registeredAddresses[msg.sender] && (BuyerMapping[msg.sender].id == msg.sender));
@@ -276,12 +305,14 @@ function checkLandInspector(address _inspectorId) public view returns (bool) {
 // We can also get individual details of Seller ,Buyer and Lands (area,city,price,owner)
 
 
-function GetArea(uint _landId) public view returns (uint) {
+    function GetArea(uint _landId) public view returns (uint) {
         return lands[_landId].area;
     }
+
     function GetLandCity(uint _landId) public view returns (string memory) {
         return lands[_landId].city;
     }
+
      function getLandState(uint _landId) public view returns (string memory) {
         return lands[_landId].state;
     }
@@ -291,11 +322,11 @@ function GetArea(uint _landId) public view returns (uint) {
     }
     
     
-     function getSellerDetails(address _sellerId) public view returns (string memory, uint, string memory, string memory, string memory) {
+    function getSellerDetails(address _sellerId) public view returns (string memory, uint, string memory, string memory, string memory) {
         return (SellerMapping[_sellerId].name, SellerMapping[_sellerId].age, SellerMapping[_sellerId].city, SellerMapping[_sellerId].cnic, SellerMapping[_sellerId].email);
     }
 
-     function getBuyerDetails(address _buyerId) public view returns ( string memory,uint, string memory, string memory, string memory) {
+    function getBuyerDetails(address _buyerId) public view returns ( string memory,uint, string memory, string memory, string memory) {
         return (BuyerMapping[_buyerId].name, BuyerMapping[_buyerId].age,BuyerMapping[_buyerId].city , BuyerMapping[_buyerId].cnic, BuyerMapping[_buyerId].email);
     }
 
