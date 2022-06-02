@@ -65,7 +65,7 @@ contract landRegistry{
     mapping(uint => LandInspector) private InspectorMapping;
     mapping(address => Seller) private SellerMapping;
     mapping(address => Buyer) private BuyerMapping;
-    mapping(uint => address payable) private LandOwner;
+    mapping(uint => address ) private LandOwner;
     mapping(address => bool) private registeredSellers;
     mapping(address => bool) private verifiedSellers;
     mapping(address => bool) private rejectedSellers;
@@ -114,10 +114,10 @@ contract landRegistry{
       //The require  check Seller and its id verifcation 
         require((checkSellerVerification(msg.sender)) && (checkIdVerification(msg.sender)));
         totallands++;
-        ////the following commented line will convert land price unit from wei to ether
-      ///  _landPrice*=10^18;
+        
+        
         lands[totallands] = Land(totallands, _area, _city, _state, _landPrice ,_propertyPID);
-        LandOwner[totallands] = payable(msg.sender);
+        LandOwner[totallands] = msg.sender;
     
     }
 
@@ -336,33 +336,33 @@ function checkLandInspector(address _inspectorId) public view returns (bool) {
 
 
 // Ther buyer will pay the amount with this function
-
+    function transferLandOwnerPayingLandPrice(uint _landId,address _newLandOwner)internal{
+        LandOwner[_landId] = _newLandOwner;
+    }
+   
 
 
     function BuyLand (uint _landId) public payable {
-        require(verifiedBuyer[msg.sender]);
-        require(registeredSellers[LandOwner[_landId]]);
+        require(verifiedBuyer[msg.sender],"You are not verified");
+        require(registeredSellers[LandOwner[_landId]],"The land owner is not a Seller");
         require(verifiedLands[_landId],"You Cannot buy the land because it is not verified");
-        uint price=lands[_landId].landPrice;
-        require(msg.value==price,"Your payment is not exactly eqaule to landPrice");
-
+        require(msg.value==lands[_landId].landPrice,"Your payment is not exactly eqaule to landPrice");
         receivedPayments[_landId] = true;
-        LandOwner[_landId].transfer(msg.value);
+        payable (LandOwner[_landId]).transfer(msg.value);
+        transferLandOwnerPayingLandPrice(_landId,msg.sender);
+
       
     }
   
 
-//  The land ownership will transfer to the new owner by land inspector
+//  The land ownership will transfer to the new owner by landOwner
     function transferLandOwnership(uint _landId, address _newLandOwner) public{
-        require(checkLandInspector(msg.sender));
-        require(receivedPayments[_landId],"The land price is not paid by the buyer");
-
-        LandOwner[_landId] = payable(_newLandOwner);
+        require(LandOwner[_landId]==msg.sender,"You can not transfer because you are not the owner");
+        LandOwner[_landId] = _newLandOwner;
     }
    
 
-   
-   
+    
 
 
 
