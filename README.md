@@ -1,10 +1,10 @@
 # LandRegisteration
 Land registry in many parts of the world is very slow and
 cumbersome process. There are also many intermediaries involved in the process of land
-registration. Developing a system that not only accelerate the process of land registration, but also
+registration. It is  a system that not only accelerate the process of land registration, but also
 make it easier for Buyers, Sellers and Government registrars to transfer the land ownership from
-seller to a new buyer, is only possible by creating a distributed system that store all the transactions
-made during the process of land buying. In this Project we’ll try to explore the possibilities and
+seller to a new buyer,  a distributed system that store all the transactions
+made during the process of land buying. In this Project we have tried to explore the possibilities and
 problems solved by using a blockchain based system for land ownership transfer. The system that
 we are trying to implement is based on Ethereum Blockchain that will store all the transactions
 made during the process of land ownership transfer.This system will solve the problems faced by all
